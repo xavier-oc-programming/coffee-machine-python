@@ -55,6 +55,7 @@ python advanced/main.py
 | Zero magic numbers            | No       | Yes (`config.py`) |
 | Persisted lifetime revenue    | No       | Yes (`data.txt`) |
 | Input validation (coins)      | Basic    | Full (loops on invalid) |
+| Ingredient refill commands    | Yes      | Yes      |
 | Floating-point safety         | No       | Yes (`round()` throughout) |
 | Terminal launcher (`menu.py`) | —        | ✓ |
 
@@ -119,6 +120,8 @@ If resources are insufficient at step 2, the order is cancelled and the machine 
 
 **Resource report** — typing `report` prints current water, milk, coffee, and revenue levels with aligned columns.
 
+**Ingredient refill** — typing `refill` tops up all ingredients to their starting levels in one command. Typing `refill water`, `refill milk`, or `refill coffee` restocks a single ingredient. Invalid ingredient names print an error without affecting anything else.
+
 **Input validation** — unknown commands print an error without crashing or restarting the machine.
 
 ### Advanced Build Only
@@ -161,38 +164,40 @@ python menu.py
 │   waiting for command...       │
 └──────────────┬─────────────────┘
                │
-    ┌──────────┼──────────────┬──────────────┐
-    ▼          ▼              ▼              ▼
-  "off"     "report"    drink name      anything else
-    │          │              │              │
-  shutdown   print          valid?         print
-  & exit     report     ┌────┴────┐       "invalid"
-                         ▼        ▼
-                        yes        no
-                         │        │
-                    resource    print "not
-                     check       in menu"
-                         │
-                    sufficient?
-                   ┌─────┴─────┐
-                   ▼           ▼
-                  yes           no
-                   │            │
-             show cost      print "not
-             coin menu      enough X"
-                   │
-              coin loop
-           (repeat until paid)
-                   │
-             calculate change
-             deduct resources
-             add revenue
-             print confirmation
-                   │
-                   ▼
-         ┌────────────────────┐
-         │   back to prompt   │
-         └────────────────────┘
+    ┌──────────┼──────────┬──────────────┬──────────────┐
+    ▼          ▼          ▼              ▼              ▼
+  "off"     "report"   "refill"     drink name      anything else
+    │          │        "refill X"      │              │
+  shutdown   print         │          valid?          print
+  & exit     report    valid X?    ┌────┴────┐       "invalid"
+                       ┌───┴───┐   ▼        ▼
+                       ▼       ▼  yes        no
+                   reset X  print        print "not
+                   or all   "invalid      in menu"
+                      │     ingredient"
+                   print           │
+                 confirmation  back to prompt
+                      │
+                 back to prompt
+                                    │ (yes branch)
+                              resource check
+                              sufficient?
+                             ┌─────┴─────┐
+                             ▼           ▼
+                            yes           no
+                             │            │
+                       show cost      print "not
+                       coin menu      enough X"
+                             │            │
+                        coin loop    back to prompt
+                     (repeat until paid)
+                             │
+                       calculate change
+                       deduct resources
+                       add revenue
+                       print confirmation
+                             │
+                       back to prompt
 ```
 
 ---
@@ -300,6 +305,8 @@ All constants live in `advanced/config.py`. No other file uses a magic number.
 | `COIN_TYPES` | *(dict)* | Coin keys `"1"`–`"4"` → name + value |
 | `CMD_OFF` | `"off"` | Shutdown command string |
 | `CMD_REPORT` | `"report"` | Report command string |
+| `CMD_REFILL` | `"refill"` | Refill command prefix string |
+| `REFILLABLE` | `("water", "milk", "coffee")` | Valid ingredient names for `refill <x>` |
 | `REPORT_LABEL_WIDTH` | `10` | Left-column width for report rows |
 | `COIN_NAME_WIDTH` | `10` | Left-column width for coin menu rows |
 
@@ -330,39 +337,47 @@ The terminal session follows a strict linear flow with one re-entry point:
   START
     │
     ▼
-┌──────────────────────────────────────────┐
-│ prompt: espresso / latte / cappuccino /  │◄──────────────┐
-│         report / off                     │               │
-└──────────────┬───────────────────────────┘               │
-               │                                           │
-        ┌──────┴──────┐                                    │
-        │             │                                    │
-       off          report         invalid         drink name
-        │             │               │                    │
-    shutdown       ┌──┴───────────┐  error                 │
-      exit         │   Resource   │   msg          ┌───────┴──────┐
-                   │   Report     │                │              │
-                   │  water: Xml  │         not enough X     resources OK
-                   │  milk:  Xml  │                │              │
-                   │  coffee: Xg  │               msg          show cost
-                   │  revenue: $X │                │              │
-                   └──────────────┘          back to prompt   ┌──┴──────────────────┐
-                         │                                    │    COIN LOOP         │
-                   back to prompt                             │  show coin menu      │
-                                                             │  prompt coin type    │
-                                                             │  prompt quantity     │
-                                                             │  add to running total│
-                                                             │  repeat if total<cost│
-                                                             └──────────┬───────────┘
-                                                                        │
-                                                                  total >= cost
-                                                                        │
-                                                               calculate change
-                                                               deduct ingredients
-                                                               add revenue to disk
-                                                               print confirmation
-                                                                        │
-                                                                back to prompt ──►
+┌─────────────────────────────────────────────────────────┐
+│  >> prompt                                              │◄───────────────────┐
+│  espresso / latte / cappuccino / report / refill / off  │                    │
+└──────────────┬──────────────────────────────────────────┘                    │
+               │                                                               │
+     ┌─────────┼──────────┬──────────────┬───────────────┐                    │
+     ▼         ▼          ▼              ▼               ▼                    │
+   "off"    "report"   "refill"      drink name       unknown                 │
+     │         │       "refill X"       │              input                  │
+  shutdown  ┌──┴────┐      │          valid?           error ──────────────────┤
+   & exit   │Report │  valid X?     ┌───┴───┐                                 │
+            │water  │  ┌────┴────┐  ▼       ▼                                 │
+            │milk   │  ▼         ▼  yes      no                               │
+            │coffee │reset X  "invalid  "not in                               │
+            │$rev   │or all   ingredient"  menu" ─────────────────────────────┤
+            └──┬────┘  then      ──────────────────────────────────────────────┤
+               │     confirm                                                   │
+               │       │                                                       │
+               └───────┴──────────────────────────────────────────────────────┤
+                                        │ (drink valid)                        │
+                                   resource check                              │
+                                   sufficient?                                 │
+                                  ┌─────┴─────┐                               │
+                                  ▼           ▼                               │
+                                 yes          no                              │
+                                  │       "not enough X" ─────────────────────┤
+                             show cost                                        │
+                             coin menu                                        │
+                                  │                                           │
+                          ┌───────┴────────┐                                  │
+                          │   COIN LOOP    │                                  │
+                          │ prompt type    │                                  │
+                          │ prompt qty     │                                  │
+                          │ add to total   │                                  │
+                          │ loop if < cost │                                  │
+                          └───────┬────────┘                                  │
+                                  │ total >= cost                             │
+                          calculate change                                    │
+                          deduct ingredients                                  │
+                          save revenue to disk                                │
+                          print confirmation ──────────────────────────────────┘
 ```
 
 ---
