@@ -6,10 +6,16 @@ class Display:
 
     # ── Prompts ───────────────────────────────────────────────────────────────
 
+    def show_startup(self) -> None:
+        """Print the command reference shown once when the machine starts."""
+        drink_names = " / ".join(MENU.keys())
+        print("\nCoffee Machine ready.")
+        print(f"  Orders  : {drink_names}")
+        print("  Commands: report / off\n")
+
     def prompt_drink(self) -> str:
         """Prompt for a drink order and return the input as lowercase string."""
-        drink_names = "/".join(MENU.keys())
-        return input(f"\nWhat would you like? ({drink_names}): ").strip().lower()
+        return input(">> ").strip().lower()
 
     def prompt_coin(self) -> str:
         """Prompt for a coin type selection and return the raw input."""

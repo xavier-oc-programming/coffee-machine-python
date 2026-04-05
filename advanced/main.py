@@ -17,6 +17,8 @@ def main() -> None:
     coins   = CoinProcessor()
     display = Display()
 
+    display.show_startup()
+
     while True:
         user_input = display.prompt_drink()
 

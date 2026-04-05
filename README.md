@@ -62,17 +62,25 @@ python advanced/main.py
 
 ## 3. Commands
 
-These commands are typed at the main prompt in either build:
+On startup, both builds print a command reference before the first prompt:
 
-| Input              | Context         | Result                                   |
-|--------------------|-----------------|------------------------------------------|
-| `espresso`         | Main prompt     | Begin ordering an espresso ($1.50)       |
-| `latte`            | Main prompt     | Begin ordering a latte ($2.50)           |
-| `cappuccino`       | Main prompt     | Begin ordering a cappuccino ($3.00)      |
-| `report`           | Main prompt     | Print current resource and revenue levels|
-| `off`              | Main prompt     | Shut down the machine and exit           |
-| `1` `2` `3` `4`   | Coin prompt     | Select penny / nickel / dime / quarter   |
-| *(any integer)*    | Coin amount prompt | Number of that coin to insert         |
+```
+Coffee Machine ready.
+  Orders  : espresso / latte / cappuccino
+  Commands: report / off
+```
+
+Commands are then entered at the `>>` prompt:
+
+| Input              | Context            | Result                                    |
+|--------------------|--------------------|-------------------------------------------|
+| `espresso`         | `>>` prompt        | Begin ordering an espresso ($1.50)        |
+| `latte`            | `>>` prompt        | Begin ordering a latte ($2.50)            |
+| `cappuccino`       | `>>` prompt        | Begin ordering a cappuccino ($3.00)       |
+| `report`           | `>>` prompt        | Print current resource and revenue levels |
+| `off`              | `>>` prompt        | Shut down the machine and exit            |
+| `1` `2` `3` `4`   | Coin prompt        | Select penny / nickel / dime / quarter    |
+| *(any integer)*    | Coin amount prompt | Number of that coin to insert             |
 
 ---
 
@@ -253,7 +261,8 @@ coffee-machine-python/
 
 | Method | Returns | Description |
 |--------|---------|-------------|
-| `prompt_drink()` | `str` | Prompts for and returns drink name input |
+| `show_startup()` | `None` | Prints the command reference once on machine start |
+| `prompt_drink()` | `str` | Prompts for and returns drink name input at `>>` |
 | `prompt_coin()` | `str` | Prompts for coin type selection |
 | `prompt_coin_amount(coin_name)` | `int` | Prompts for quantity; loops until valid integer |
 | `show_report(report)` | `None` | Prints resource levels and revenue |

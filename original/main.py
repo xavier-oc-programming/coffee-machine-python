@@ -34,8 +34,12 @@ def resource_update(order):
 #   f) Give back change
 #   g) update resources
 
+print("\nCoffee Machine ready.")
+print("  Orders  : espresso / latte / cappuccino")
+print("  Commands: report / off\n")
+
 while machine_on:
-    user_input = input("What would you like? (espresso/latte/cappuccino): ")
+    user_input = input(">> ")
 
     #   a) turn off
     if user_input == "off":
