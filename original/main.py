@@ -3,6 +3,12 @@ import coffee_data
 machine_on = True
 ordering_coffee = None
 
+STARTING_RESOURCES = {
+    "water":  300,
+    "milk":   200,
+    "coffee": 100,
+}
+
 
 # define enough_resources_check
 def resource_check(order):
@@ -22,6 +28,7 @@ def resource_update(order):
 # 1) ask for command from user:
 #   a) turn off
 #   b) get resource report
+#   b2) refill all / refill <ingredient>
 #   c) PART 1: Order type of coffee
 #   c) PART 2: Check if coffe can be made (sufficient resources)
 #   d) Define cost of selected coffee
@@ -36,7 +43,7 @@ def resource_update(order):
 
 print("\nCoffee Machine ready.")
 print("  Orders  : espresso / latte / cappuccino")
-print("  Commands: report / off\n")
+print("  Commands: report / refill / refill <ingredient> / off\n")
 
 while machine_on:
     user_input = input(">> ")
@@ -54,6 +61,25 @@ while machine_on:
         print(f"{'Milk:':<10} {coffee_data.resources['milk']}ml")
         print(f"{'Coffee:':<10} {coffee_data.resources['coffee']}g")
         print(f"{'Money:':<10} ${coffee_data.resources['money']:.2f}")
+
+    #   b2) refill all ingredients
+    elif user_input == 'refill':
+        for ingredient in STARTING_RESOURCES:
+            coffee_data.resources[ingredient] = STARTING_RESOURCES[ingredient]
+        print("Refilled all ingredients.")
+        print(f"  Water:  {coffee_data.resources['water']}ml")
+        print(f"  Milk:   {coffee_data.resources['milk']}ml")
+        print(f"  Coffee: {coffee_data.resources['coffee']}g")
+
+    #   b3) refill a single ingredient
+    elif user_input.startswith('refill '):
+        ingredient = user_input[7:]
+        if ingredient in STARTING_RESOURCES:
+            coffee_data.resources[ingredient] = STARTING_RESOURCES[ingredient]
+            units = {"water": "ml", "milk": "ml", "coffee": "g"}
+            print(f"Refilled {ingredient}: {coffee_data.resources[ingredient]}{units[ingredient]}")
+        else:
+            print(f'"{ingredient}" is not a refillable ingredient. Try: water / milk / coffee')
 
     #   c) order type of coffee
     #   assuming the input is in the coffee_data.py MENU dictionary (keys)--> ['espresso', 'latte', 'cappuccino']

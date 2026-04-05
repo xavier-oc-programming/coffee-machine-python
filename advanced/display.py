@@ -11,7 +11,7 @@ class Display:
         drink_names = " / ".join(MENU.keys())
         print("\nCoffee Machine ready.")
         print(f"  Orders  : {drink_names}")
-        print("  Commands: report / off\n")
+        print("  Commands: report / refill / refill <ingredient> / off\n")
 
     def prompt_drink(self) -> str:
         """Prompt for a drink order and return the input as lowercase string."""
@@ -67,6 +67,20 @@ class Display:
 
     def show_invalid_coin(self) -> None:
         print("  Invalid coin. Please choose a number from the menu.")
+
+    def show_refill_all(self, amounts: dict[str, int]) -> None:
+        print("\n  Refilled all ingredients:")
+        units = {"water": "ml", "milk": "ml", "coffee": "g"}
+        for ingredient, amount in amounts.items():
+            print(f"    {ingredient.capitalize()}: {amount}{units[ingredient]}")
+
+    def show_refill_one(self, ingredient: str, amount: int) -> None:
+        units = {"water": "ml", "milk": "ml", "coffee": "g"}
+        print(f"\n  Refilled {ingredient}: {amount}{units[ingredient]}")
+
+    def show_refill_invalid(self, ingredient: str) -> None:
+        print(f'  "{ingredient}" is not a refillable ingredient. '
+              f"Try: water / milk / coffee")
 
     def show_shutdown(self) -> None:
         print("\n  Coffee machine is turning off...\n  Have a nice day!")

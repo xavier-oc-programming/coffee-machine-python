@@ -4,7 +4,7 @@ from pathlib import Path
 # Ensure sibling modules resolve correctly regardless of working directory.
 sys.path.insert(0, str(Path(__file__).parent))
 
-from config import CMD_OFF, CMD_REPORT
+from config import CMD_OFF, CMD_REPORT, CMD_REFILL, REFILLABLE
 from machine import CoffeeMachine
 from drink_menu import DrinkMenu
 from coin_processor import CoinProcessor
@@ -29,6 +29,19 @@ def main() -> None:
 
         if user_input == CMD_REPORT:
             display.show_report(machine.get_report())
+            continue
+
+        # ── Refill ────────────────────────────────────────────────────────────
+        if user_input == CMD_REFILL:
+            display.show_refill_all(machine.refill_all())
+            continue
+
+        if user_input.startswith(CMD_REFILL + " "):
+            ingredient = user_input[len(CMD_REFILL) + 1:]
+            if ingredient in REFILLABLE:
+                display.show_refill_one(ingredient, machine.refill_one(ingredient))
+            else:
+                display.show_refill_invalid(ingredient)
             continue
 
         # ── Order validation ──────────────────────────────────────────────────

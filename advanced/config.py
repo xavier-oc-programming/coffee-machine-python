@@ -30,6 +30,9 @@ COIN_TYPES: dict[str, dict] = {
 # ── Commands ──────────────────────────────────────────────────────────────────
 CMD_OFF:    str = "off"
 CMD_REPORT: str = "report"
+CMD_REFILL: str = "refill"
+
+REFILLABLE: tuple[str, ...] = ("water", "milk", "coffee")
 
 # ── Formatting ────────────────────────────────────────────────────────────────
 REPORT_LABEL_WIDTH: int = 10    # left-column width for resource report rows

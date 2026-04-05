@@ -1,5 +1,11 @@
 from pathlib import Path
-from config import STARTING_WATER, STARTING_MILK, STARTING_COFFEE, MENU
+from config import STARTING_WATER, STARTING_MILK, STARTING_COFFEE, MENU, REFILLABLE
+
+_STARTING: dict[str, int] = {
+    "water":  STARTING_WATER,
+    "milk":   STARTING_MILK,
+    "coffee": STARTING_COFFEE,
+}
 
 _DATA_FILE = Path(__file__).parent / "data.txt"
 
@@ -28,6 +34,19 @@ class CoffeeMachine:
         """Deduct ingredients consumed by the given drink."""
         for ingredient, amount in MENU[drink_name]["ingredients"].items():
             setattr(self, ingredient, getattr(self, ingredient) - amount)
+
+    # ── Refill ────────────────────────────────────────────────────────────────
+
+    def refill_all(self) -> dict[str, int]:
+        """Reset all ingredients to starting levels. Returns new amounts."""
+        for ingredient in REFILLABLE:
+            setattr(self, ingredient, _STARTING[ingredient])
+        return {k: _STARTING[k] for k in REFILLABLE}
+
+    def refill_one(self, ingredient: str) -> int:
+        """Reset one ingredient to its starting level. Returns new amount."""
+        setattr(self, ingredient, _STARTING[ingredient])
+        return _STARTING[ingredient]
 
     # ── Revenue ───────────────────────────────────────────────────────────────
 

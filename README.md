@@ -67,20 +67,24 @@ On startup, both builds print a command reference before the first prompt:
 ```
 Coffee Machine ready.
   Orders  : espresso / latte / cappuccino
-  Commands: report / off
+  Commands: report / refill / refill <ingredient> / off
 ```
 
 Commands are then entered at the `>>` prompt:
 
-| Input              | Context            | Result                                    |
-|--------------------|--------------------|-------------------------------------------|
-| `espresso`         | `>>` prompt        | Begin ordering an espresso ($1.50)        |
-| `latte`            | `>>` prompt        | Begin ordering a latte ($2.50)            |
-| `cappuccino`       | `>>` prompt        | Begin ordering a cappuccino ($3.00)       |
-| `report`           | `>>` prompt        | Print current resource and revenue levels |
-| `off`              | `>>` prompt        | Shut down the machine and exit            |
-| `1` `2` `3` `4`   | Coin prompt        | Select penny / nickel / dime / quarter    |
-| *(any integer)*    | Coin amount prompt | Number of that coin to insert             |
+| Input                   | Context            | Result                                          |
+|-------------------------|--------------------|-------------------------------------------------|
+| `espresso`              | `>>` prompt        | Begin ordering an espresso ($1.50)              |
+| `latte`                 | `>>` prompt        | Begin ordering a latte ($2.50)                  |
+| `cappuccino`            | `>>` prompt        | Begin ordering a cappuccino ($3.00)             |
+| `report`                | `>>` prompt        | Print current resource and revenue levels       |
+| `refill`                | `>>` prompt        | Reset all ingredients to starting levels        |
+| `refill water`          | `>>` prompt        | Reset water to 300 ml                           |
+| `refill milk`           | `>>` prompt        | Reset milk to 200 ml                            |
+| `refill coffee`         | `>>` prompt        | Reset coffee to 100 g                           |
+| `off`                   | `>>` prompt        | Shut down the machine and exit                  |
+| `1` `2` `3` `4`         | Coin prompt        | Select penny / nickel / dime / quarter          |
+| *(any integer)*         | Coin amount prompt | Number of that coin to insert                   |
 
 ---
 
@@ -241,6 +245,8 @@ coffee-machine-python/
 |--------|---------|-------------|
 | `check_resources(drink_name)` | `str \| None` | First insufficient ingredient name, or `None` if OK |
 | `deduct_resources(drink_name)` | `None` | Deduct ingredients used by a drink |
+| `refill_all()` | `dict[str, int]` | Reset all ingredients to starting levels, return new amounts |
+| `refill_one(ingredient)` | `int` | Reset one ingredient to its starting level, return new amount |
 | `add_revenue(amount)` | `None` | Add a sale to session + lifetime revenue, save to disk |
 | `get_report()` | `dict[str, int \| float]` | Current resource levels and revenue figures |
 
@@ -273,6 +279,9 @@ coffee-machine-python/
 | `show_checking(drink)` | `None` | Prints resource check message |
 | `show_insufficient_resources(ingredient)` | `None` | Prints shortage error |
 | `show_invalid_input(text)` | `None` | Prints unrecognised command error |
+| `show_refill_all(amounts)` | `None` | Prints confirmation after all ingredients refilled |
+| `show_refill_one(ingredient, amount)` | `None` | Prints confirmation after single ingredient refilled |
+| `show_refill_invalid(ingredient)` | `None` | Prints error for unrecognised ingredient name |
 | `show_invalid_coin()` | `None` | Prints invalid coin selection error |
 | `show_shutdown()` | `None` | Prints goodbye message |
 
