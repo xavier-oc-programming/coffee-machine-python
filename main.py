@@ -70,6 +70,7 @@ while machine_on:
             print("Sufficient resources to prepare order.")
         else:
             print("Insufficient resources to prepare order.")
+            ordering_coffee = False
             break
         #   d) Define cost of selected coffee
         order_cost = float(coffee_data.MENU[user_input]['cost'])
@@ -110,6 +111,5 @@ while machine_on:
 
         # Update resources
         resource_update(user_input)
+        coffee_data.resources['money'] += order_cost
         ordering_coffee = False
-
-#  TODO: 1. Check out these todos
