@@ -1,0 +1,8 @@
+# No external packages required — standard library only.
+# Requires Python 3.10+ for X | Y union type hints.
+#
+# Standard library modules used:
+#   os          — console clearing (menu.py)
+#   sys         — subprocess launcher path resolution (menu.py, advanced/display.py)
+#   subprocess  — launching original/ and advanced/ from the terminal menu (menu.py)
+#   pathlib     — Path(__file__).parent for portable file paths (menu.py, advanced/)
